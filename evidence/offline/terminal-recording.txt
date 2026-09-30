@@ -1,0 +1,348 @@
+=== OFFLINE DEMO 2026-09-29 22:24:26 ===
+--- proof of no internet ---
+
+[36m$ networksetup -getairportpower en0[0m
+Wi-Fi Power (en0): Off
+
+[36m$ curl -sS -m 5 -o /dev/null -w '%{http_code}\n' https://www.google.com[0m
+curl: (6) Could not resolve host: www.google.com
+000
+(curl failed: internet unreachable ✔)
+
+[36m$ ping -c 1 -t 2 1.1.1.1[0m
+PING 1.1.1.1 (1.1.1.1): 56 data bytes
+ping: sendto: No route to host
+
+--- 1.1.1.1 ping statistics ---
+1 packets transmitted, 0 packets received, 100.0% packet loss
+(ping failed: internet unreachable ✔)
+
+--- device + runtime ---
+
+[36m$ sysctl -n machdep.cpu.brand_string[0m
+Apple M1
+
+[36m$ ollama --version[0m
+]11;?\[6nollama version is 0.34.3
+
+[36m$ ollama list[0m
+]11;?\[6nNAME                     ID              SIZE      MODIFIED     
+embeddinggemma:latest    85462619ee72    621 MB    30 hours ago    
+gemma4:e4b               c6eb396dbd59    9.6 GB    30 hours ago    
+gemma4:e2b               7fbdbf8f5e45    7.2 GB    7 days ago      
+gemma3:4b                a2af6cc3eb7f    3.3 GB    7 days ago      
+
+--- restart the CLI + local model ---
+
+[36m$ ollama stop gemma4:e4b[0m
+]11;?\[6n[?2026h[?25l[1G[K[?25h[?2026l[?25l[2K[1G[?25h
+[36m$ .venv/bin/wiki --help[0m
+usage: wiki [-h] [--model MODEL] [--mode {local}] command ...
+
+Personal wiki over my course notes, answered by a local Gemma model. Everything runs on this machine.
+
+positional arguments:
+  command
+    ingest        read sources, generate linked notes, update index
+    search        show matching original passages (no model answer)
+    ask           standalone factual answer with citations
+    chat          talk with Wren, the assistant (conversation + optional
+                  retrieval)
+    eval          run evals/questions.json in ask mode, save evidence cards
+    check         check wiki links, filenames, and index
+    rename        rename a note and update every link to it
+    reindex       rebuild the retrieval index only
+    help          show this help
+
+options:
+  -h, --help      show this help message and exit
+  --model MODEL   Ollama model tag (default gemma4:e4b)
+  --mode {local}  where the model runs; only 'local' is implemented
+
+examples:
+  wiki ingest vault/raw                     generate/update notes from every raw source
+  wiki ingest "staging/New Notes.md"        copy one new source into vault/raw/ and ingest it
+  wiki search "learning rate"               original passages + paths, no model answer
+  wiki ask "What learning rate did I use?"  neutral, cited answer (or insufficient evidence)
+  wiki chat                                 talk to Wren, the assistant (uses retrieval only when needed)
+  wiki eval                                 run the 4 test questions, write evidence cards
+  wiki check                                verify links and that notes/index are consistent
+
+configuration (environment variables):
+  WIKI_MODEL        chat model   (default gemma4:e4b)
+  WIKI_EMBED_MODEL  embeddings   (default embeddinggemma)
+  OLLAMA_HOST       runtime URL  (default http://127.0.0.1:11434; local only)
+
+requires: Ollama running (`ollama serve`) with both models pulled once while online:
+  ollama pull gemma4:e4b && ollama pull embeddinggemma
+
+--- ingest a new local source (held back until now) ---
+[33m⏳ Gemma is reading the new document and writing wiki pages. This prints NOTHING for 4-6 minutes. Do not type anything, just wait.[0m
+
+[36m$ /usr/bin/time -l .venv/bin/wiki ingest 'staging/Class 5 - Personal Wiki Brief.md'[0m
++ copied Class 5 - Personal Wiki Brief.md into vault/raw/ (unchanged)
+> Class 5 - Personal Wiki Brief.md: sending to gemma4:e4b …
+  gemma: 215.99s, 2935 prompt tok, 1372 out tok
+  ✓ Courses/Personal Wiki Local Gemma RAG.md
+  ✓ Concepts/Retrieval Augmented Generation.md
+  ✓ Concepts/Three Required Modes.md
+  ✓ Concepts/Local Model Deployment.md
+  ✓ Concepts/Obsidian Wiki Structure.md
+wiki: 24 notes · 1 source(s) processed · 0 broken link(s) removed
+rebuilding retrieval index …
+  indexed 218 passages (100 raw, 118 wiki) from 29 files
+done in 236.2s
+      236.44 real         0.25 user         0.08 sys
+            43450368  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                7688  page reclaims
+                  20  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                  16  messages sent
+                  23  messages received
+                   0  signals received
+                 176  voluntary context switches
+                 234  involuntary context switches
+          1383394752  instructions retired
+           536928175  cycles elapsed
+            36717288  peak memory footprint
+
+[36m$ .venv/bin/wiki ingest vault/raw[0m
+= Class 3 - Ms Pacman DQN.md: unchanged since last ingest, skipped (use --force to regenerate)
+= Class 4 - Assignment Brief.md: unchanged since last ingest, skipped (use --force to regenerate)
+= Class 4 - nanoGPT Experiment.md: unchanged since last ingest, skipped (use --force to regenerate)
+= Class 5 - Personal Wiki Brief.md: unchanged since last ingest, skipped (use --force to regenerate)
+= Networking Tracker Project.md: unchanged since last ingest, skipped (use --force to regenerate)
+wiki: 24 notes · 0 source(s) processed · 0 broken link(s) removed
+rebuilding retrieval index …
+  index up to date (218 passages)
+done in 0.0s
+
+[36m$ .venv/bin/wiki check[0m
+24 notes · 0 broken links · 0 machine-style names · 0 duplicate titles · 0 heading/filename mismatches
+
+[36m$ ollama ps[0m
+]11;?\[6nNAME                     ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+embeddinggemma:latest    85462619ee72    673 MB    100% GPU     2048       4 minutes from now    
+gemma4:e4b               c6eb396dbd59    3.3 GB    100% GPU     16384      4 minutes from now    
+
+--- search mode (no model answer) ---
+
+[36m$ .venv/bin/wiki search 'learning rate' --scope raw -k 3 --save evidence/offline/search-learning-rate.md[0m
+search: "learning rate"  (scope=raw, top 3, no answer generated)
+
+[1] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L23-27)  [ORIGINAL]
+    bm25=6.69  cosine=0.425  fused=0.0325
+    | | Learning rate | `0.0001` | Used the notebook's suggested reference value. This is a conservative rate for Adam on this size of convolutional network — large enough to learn within 100 episodes, small enough to avoid destabilizing Q-value estimates given the small (5,000-transition) replay buffer. | Evaluation settings were left unchanged as required: the same 5 seeds (`101, 202, 303, 404, 505`), 5% evaluation …
+
+[2] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > My evidence > Tokens, embeddings, gradient, and one weight update (L164-186)  [ORIGINAL]
+    bm25=6.76  cosine=0.349  fused=0.0315
+    | (`-0.99912 × lr`), **not** `-lr * gradient` (which would be `-6.9e-9`, about 1,400× smaller). This is a real, checkable illustration of why the training cell's comment says AdamW "is not simply learning-rate times gradient": on its very first step, Adam's bias-corrected first/second-moment estimates both reduce to the raw gradient itself (`m̂ = g`, `v̂ = g²`), so the update becomes `-lr × g/(|g|+ε) ≈ -lr × …
+
+[3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L17-23)  [ORIGINAL]
+    bm25=4.04  cosine=0.403  fused=0.0311
+    | ## My three hyperparameters | Setting | Value | Why I chose it | |---|---|---| | Exploration | `0.25` | Slightly above the notebook's `0.20` starting point, to see whether a bit more randomness during training helps the agent discover higher-scoring paths (e.g. finding fruit or clearing a section) instead of settling early into a narrow, repeated pattern. My first instinct was "Pac-Man has 4 moves, so 25% …
+
+--- the four ask-mode tests ---
+[33m⏳ Running the 4 test questions: about 1 minute each, with pauses. Do not type anything.[0m
+
+[36m$ .venv/bin/wiki eval --out evidence/offline/ask[0m
+
+=== test1 (direct, one source): What learning rate did I use for the nanoGPT experiments?
+Retrieved passages:
+  [S1] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Overview (L5-8)
+  [S2] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment (L1-11)
+  [S3] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Scope (L229-237)
+  [S4] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Open the Notebook (L41-50)
+  [S5] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > My choices and prediction (L12-36)
+  [S6] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L23-27)
+  [S7] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > My evidence > Tokens, embeddings, gradient, and one weight update (L164-186)
+  [S8] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L17-23)
+
+For the nanoGPT experiments, the learning rate used was 0.001 [S5]. This learning rate was used with built-in warmup + cosine decay [S5].
+
+Sources:
+  [S5] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > My choices and prediction (L12-36)
+  citation check: all citations point to retrieved passages
+model: gemma4:e4b (local) · 46.99s · 2824 prompt tok · 40 out tok
+(end-to-end 47.1s incl. retrieval)
+(evidence card: evidence/offline/ask/test1.md)
+
+=== test2 (paraphrased, one source): Why didn't my Pac-Man agent get better at staying alive even after much longer training?
+Retrieved passages:
+  [S1] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > What I expected vs. what I observed (L43-57)
+  [S2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Limitation and next experiment (L142-174)
+  [S3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Limitation and next experiment (L172-181)
+  [S4] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Learning Focus (L207-210)
+  [S5] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment (L1-11)
+  [S6] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > My evidence > Loss and samples (L124-137)
+  [S7] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > What I learned (L393-415)
+  [S8] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Your Three Choices (L69-82)
+
+The agent's inability to survive longer, despite more training, was due to several factors [S2]:
+*   The environment uses `repeat_action_probability=0.25`, which means the game sometimes ignores the agent's chosen move and repeats its previous move, creating a structural death risk [S2].
+*   Grayscale preprocessing might obscure the color cue that ghosts turn blue or flashing to signal safety after a power pellet, making the evasion decision harder to learn from pixels alone [S2].
+*   Evasion is a more difficult credit-assignment problem than pellet collection, as reacting to moving, chasing ghosts requires more varied experience than what a 5,000-transition replay buffer and infrequent target-network syncing are suited for [S2].
+
+The passages also noted that the evaluation score nearly doubled, suggesting the network got better at collecting points within the same short lifespan, rather than learning to evade ghosts better [S1][S2].
+
+Sources:
+  [S2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Limitation and next experiment (L142-174)
+  [S1] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > What I expected vs. what I observed (L43-57)
+  citation check: all citations point to retrieved passages
+model: gemma4:e4b (local) · 65.55s · 2982 prompt tok · 201 out tok
+(end-to-end 67.2s incl. retrieval)
+(evidence card: evidence/offline/ask/test2.md)
+
+=== test3 (connects two sources): Compare the learning rates I chose for the Pac-Man DQN and the nanoGPT model.
+Retrieved passages:
+  [S1] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L23-27)
+  [S2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L17-23)
+  [S3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent (L1-7)
+  [S4] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Overview (L5-8)
+  [S5] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Open the Notebook (L41-50)
+  [S6] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment (L1-11)
+  [S7] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Scope (L229-237)
+  [S8] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > My choices and prediction (L33-52)
+
+For the Ms. Pac-Man DQN, the learning rate chosen was `0.0001` [S2]. This rate was described as a conservative rate for Adam on that size of convolutional network [S2]. For the nanoGPT model, a learning rate of `0.001` was chosen, which included built-in warmup + cosine decay [S8]. This rate was considered a standard conservative AdamW starting point for a model of that size [S8].
+
+Sources:
+  [S2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L17-23)
+  [S8] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment > My choices and prediction (L33-52)
+  citation check: all citations point to retrieved passages
+model: gemma4:e4b (local) · 51.38s · 2287 prompt tok · 101 out tok
+(end-to-end 51.7s incl. retrieval)
+(evidence card: evidence/offline/ask/test3.md)
+
+=== test4 (unsupported): What grade did I receive on the Class 3 Pac-Man assignment?
+Retrieved passages:
+  [S1] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent (L1-7)
+  [S2] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > How Evals Affect Your Assignment Grade (L25-33)
+  [S3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > How the agent works, in plain language (L114-141)
+  [S4] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment (L1-11)
+  [S5] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > How Evals Affect Your Assignment Grade (L39-40)
+  [S6] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > How Evals Affect Your Assignment Grade (L33-39)
+  [S7] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > What I expected vs. what I observed (L43-57)
+  [S8] raw/Class 5 - Personal Wiki Brief.md § Class 5 Assignment: Personal Wiki with Local Gemma + RAG > How Your Assignment Is Graded (L73-76)
+
+INSUFFICIENT EVIDENCE: the notes do not say what grade was received on the Class 3 Pac-Man assignment. The passages describe the grading structure for assignments like Class 3 and Class 4, which use a framework of deliverable quality (4 points), testing & evaluation (3 points), and working result (3 points) [S2] [S4] [S8].
+
+Sources:
+  [S2] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > How Evals Affect Your Assignment Grade (L25-33)
+  [S4] raw/Class 4 - nanoGPT Experiment.md § My Custom LLM Experiment (L1-11)
+  [S8] raw/Class 5 - Personal Wiki Brief.md § Class 5 Assignment: Personal Wiki with Local Gemma + RAG > How Your Assignment Is Graded (L73-76)
+  citation check: all citations point to retrieved passages
+model: gemma4:e4b (local) · 45.16s · 2457 prompt tok · 81 out tok
+(end-to-end 45.4s incl. retrieval)
+(evidence card: evidence/offline/ask/test4.md)
+
+--- ask ignores chat: claim only made in chat ---
+
+[36m$ .venv/bin/wiki ask 'What was my favorite ghost in the Pac-Man project?' --save evidence/offline/ask-chat-claim.md[0m
+INSUFFICIENT EVIDENCE: the notes do not say what the user's favorite ghost was in the Pac-Man project. The passages discuss the agent's learning process, which involves rewards for eating a scared ghost [S2], and the agent's limitation regarding survival time [S3].
+
+Sources:
+  [S2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > How the agent works, in plain language (L114-141)
+  [S3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Limitation and next experiment (L142-174)
+  citation check: all citations point to retrieved passages
+model: gemma4:e4b (local) · 48.64s · 3023 prompt tok · 62 out tok
+(evidence card: evidence/offline/ask-chat-claim.md)
+
+--- chat mode checks ---
+[33m⏳ Chat checks: 5 messages to Wren plus 1 ask, about 5 minutes. Do not type anything.[0m
+
+[36m$ .venv/bin/python scripts/mode_checks.py --out evidence/offline/mode-checks.md[0m
+you › what can you help me with?
+  · no notes searched · 22.1s
+wren › I'm here to help you with your notes.
+
+I can:
+*   **Brainstorm, draft, outline, plan, and rewrite text** with you. We can work on anything you're writing right now.
+*   **Search your personal wiki** for anything related to your courses or projects (like Ms. Pac-Man or nanoGPT).
+*   **Point you to the right commands** for using the wiki tools if you need to look up something specific.
+
+Basically, I'm a sounding board for your schoolwork. Just let me know what you're stuck on.
+
+you › what can we do?
+  · no notes searched · 23.9s
+wren › We can work on almost anything related to your coursework. Here are a few ideas:
+
+1.  **Reviewing Concepts:** If you're confused about a topic, we can talk it through.
+2.  **Drafting:** If you have an essay or report, we can outline it or rewrite sections.
+3.  **Project Work:** We can look at your specific projects. If you need to know what you wrote down about the **nanoGPT assignment** or the **Networking Tracker**, I can search your notes for details.
+4.  **Organizing:** We can structure messy notes into clear outlines or bullet points.
+
+If you want to check what you've already recorded about a project, just tell me what it is, and I can use the search tool.
+
+What subject or task is on your mind right now?
+
+you › Draft a 5-step study plan for reviewing my Pac-Man DQN project before a quiz.
+  · no notes searched · 42.2s
+wren › Suggestion: Since I don't know what you've covered in your notes for the Pac-Man DQN project, I'll draft a general, solid framework. We can tweak it once you tell me what specific areas you need to focus on.
+
+Here is a 5-step study plan:
+
+1.  **Review Core Concepts (The "Why"):** Don't just look at code. Spend time understanding *why* DQN was chosen for this problem. Review the theory behind Q-learning, state representation, and the role of the DQN architecture.
+2.  **Walk Through the Pipeline (The "How"):** Trace the entire data flow. How does the environment generate a state? How does the network take that state as input? What is the final output used for (action selection)?
+3.  **Code Walkthrough (The "What"):** Go through the most complex functions in your own code (e.g., the experience replay mechanism or the target network update). Pretend you are explaining it to someone who hasn't seen it.
+4.  **Troubleshoot Edge Cases (The "What If"):** Think about what could go wrong. What happens if the reward signal is noisy? What if the exploration rate ($\epsilon$) decays too fast? Be ready to explain the fixes.
+5.  **Practice Simulation:** If possible, run a short, focused simulation or trace a specific, tricky sequence of actions through the system manually.
+
+Does this structure look right, or should we spend more time on the math, the Python implementation, or something else?
+
+you › make that shorter
+  · no notes searched · 17.9s
+wren › Here is a much shorter version:
+
+1.  **Theory Check:** Review the core DQN concepts (Q-learning, state/action space).
+2.  **Flow Map:** Trace the entire process from environment state $\rightarrow$ network input $\rightarrow$ action output.
+3.  **Code Deep Dive:** Manually walk through the hardest functions (e.g., replay buffer updates).
+4.  **Failure Points:** Predict and explain what happens if things break (e.g., poor exploration).
+5.  **Test Run:** Run a short, targeted simulation to confirm the whole loop works.
+
+How's that? More digestible?
+
+you › Fun fact: my favorite ghost in the Pac-Man project was Sue.
+  · no notes searched · 5.5s
+wren › Got it. Sue.
+
+(No action needed on that, unless you want me to search your notes for anything related to "Sue" or specific ghost dynamics!)
+
+search: "exploration rate Pac-Man"  (scope=raw, top 3, no answer generated)
+
+[1] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Limitation and next experiment (L172-181)  [ORIGINAL]
+    bm25=14.85  cosine=0.517  fused=0.0325
+    | I'd change **exploration** next — increase it from 0.25 to something like 0.4 — on the reasoning that the agent needs more varied close-call encounters with ghosts to have anything to learn an evasion policy *from*, and pushing more randomness into training is a more direct way to generate those than simply repeating the same exploration rate for longer. *Note on process: I originally started a 500-episode run to …
+
+[2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Training plot (L89-96)  [ORIGINAL]
+    bm25=18.74  cosine=0.446  fused=0.0320
+    | ## Training plot ![Training dashboard: score, loss, and exploration over 800 episodes](results/training_dashboard.png) Score per episode (top), training loss (middle), and exploration rate (bottom, constant at 25% after the 1,000-decision random warm-up). Full per-episode data: [`results/training.csv`](results/training.csv).
+
+[3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > My three hyperparameters (L23-27)  [ORIGINAL]
+    bm25=11.94  cosine=0.409  fused=0.0306
+    | | Learning rate | `0.0001` | Used the notebook's suggested reference value. This is a conservative rate for Adam on this size of convolutional network — large enough to learn within 100 episodes, small enough to avoid destabilizing Q-value estimates given the small (5,000-transition) replay buffer. | Evaluation settings were left unchanged as required: the same 5 seeds (`101, 202, 303, 404, 505`), 5% evaluation …
+Retrieved passages:
+  [S1] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent (L1-7)
+  [S2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > How the agent works, in plain language (L114-141)
+  [S3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Limitation and next experiment (L142-174)
+  [S4] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Run the Provided Language Evals (L93-103)
+  [S5] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Open the Notebook (L41-50)
+  [S6] raw/Class 4 - Assignment Brief.md § Class 4 Assignment: Building a Custom LLM > Scope (L229-237)
+  [S7] raw/Class 5 - Personal Wiki Brief.md § Class 5 Assignment: Personal Wiki with Local Gemma + RAG > Build Your Personal Wiki (L51-56)
+  [S8] raw/Class 5 - Personal Wiki Brief.md § Class 5 Assignment: Personal Wiki with Local Gemma + RAG > Submission (L77-79)
+
+INSUFFICIENT EVIDENCE: the notes do not say what the user's favorite ghost was in the Pac-Man project. The passages discuss the agent's learning process, which involves rewards for eating a scared ghost [S2], and the agent's limitation regarding survival time [S3].
+
+Sources:
+  [S2] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > How the agent works, in plain language (L114-141)
+  [S3] raw/Class 3 - Ms Pacman DQN.md § Training a Ms. Pac-Man DQN Agent > Limitation and next experiment (L142-174)
+  citation check: all citations point to retrieved passages
+model: gemma4:e4b (local) · 8.93s · 3023 prompt tok · 62 out tok
+(saved evidence/offline/mode-checks.md)
+
+=== END OFFLINE DEMO 22:34:47 ===

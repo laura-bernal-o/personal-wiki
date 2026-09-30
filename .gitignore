@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.egg-info/
+.DS_Store
+# Obsidian workspace state (keep app settings so graph filters are reproducible)
+vault/.obsidian/workspace*.json
+vault/.obsidian/cache
+# local drafts from chat /save — generated, not evidence
+outputs/drafts/
+# model weights are never committed (they live in ~/.ollama)
+*.gguf
+.env*

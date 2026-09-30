@@ -1,0 +1,18 @@
+> Class 3 - Ms Pacman DQN.md: sending to gemma4:e4b …
+  gemma: 211.79s, 4780 prompt tok, 1345 out tok
+  = kept reviewed note [[Ms Pac-Man DQN Agent]] (only links/sources refreshed)
+  ✓ Projects/Ms Pac-Man DQN Agent.md
+  = kept reviewed note [[Hyperparameter Selection]] (only links/sources refreshed)
+  ✓ Concepts/Hyperparameter Selection.md
+  = kept reviewed note [[Agent Observation Space]] (only links/sources refreshed)
+  ✓ Concepts/Agent Observation Space.md
+  = kept reviewed note [[DQN Learning Rule]] (only links/sources refreshed)
+  ✓ Concepts/DQN Learning Rule.md
+  = kept reviewed note [[Agent Action Space]] (only links/sources refreshed)
+  ✓ Concepts/Agent Action Space.md
+wiki: 19 notes · 1 source(s) processed · 0 broken link(s) removed
+rebuilding retrieval index …
+  indexed 181 passages (87 raw, 94 wiki) from 23 files
+done in 230.0s
+NO NEW/REMOVED NOTES
+19 notes · 0 broken links · 0 machine-style names · 0 duplicate titles · 0 heading/filename mismatches

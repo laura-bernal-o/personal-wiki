@@ -1,0 +1,16 @@
+[project]
+name = "personal-wiki"
+version = "0.1.0"
+description = "Personal wiki CLI over my course notes, answered by a local Gemma model (Ollama) with RAG"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26"]
+
+[project.scripts]
+wiki = "pwiki.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["pwiki", "pwiki.modes"]

@@ -1,0 +1,41 @@
+{
+  "_note": "Answer key. Lives outside vault/ and is never indexed. Written before retrieval was built.",
+  "tests": [
+    {
+      "id": "test1",
+      "kind": "direct, one source",
+      "question": "What learning rate did I use for the nanoGPT experiments?",
+      "expected_behavior": "Answer 0.001 (with warmup + cosine decay), citing the Class 4 nanoGPT README.",
+      "expected_sources": ["raw/Class 4 - nanoGPT Experiment.md"],
+      "expected_passage": "Learning rate: 0.001, with built-in warmup + cosine decay.",
+      "expected_heading": "My choices and prediction"
+    },
+    {
+      "id": "test2",
+      "kind": "paraphrased, one source",
+      "question": "Why didn't my Pac-Man agent get better at staying alive even after much longer training?",
+      "expected_behavior": "Survival stayed ~20% of the cap (every episode ended with a ghost catching Pac-Man); likely causes: sticky actions (repeat_action_probability=0.25), grayscale preprocessing hiding the blue-ghost color cue, and evasion being a harder credit-assignment problem for a 5,000-transition replay buffer. Cite the Class 3 README.",
+      "expected_sources": ["raw/Class 3 - Ms Pacman DQN.md"],
+      "expected_passage": "Limitation: the agent never learns to survive longer ... Sticky actions ... Grayscale preprocessing ... Evasion is a harder credit-assignment problem",
+      "expected_heading": "Limitation and next experiment"
+    },
+    {
+      "id": "test3",
+      "kind": "connects two sources",
+      "question": "Compare the learning rates I chose for the Pac-Man DQN and the nanoGPT model.",
+      "expected_behavior": "Pac-Man DQN used 0.0001 (notebook reference value, conservative for Adam); nanoGPT used 0.001 (with warmup + cosine decay). Cite both READMEs.",
+      "expected_sources": ["raw/Class 3 - Ms Pacman DQN.md", "raw/Class 4 - nanoGPT Experiment.md"],
+      "expected_passage": "Learning rate | 0.0001 (Class 3) ; Learning rate: 0.001 (Class 4)",
+      "expected_heading": "My three hyperparameters / My choices and prediction"
+    },
+    {
+      "id": "test4",
+      "kind": "unsupported",
+      "question": "What grade did I receive on the Class 3 Pac-Man assignment?",
+      "expected_behavior": "State that the notes do not contain the grade received. Grading criteria (4/3/3 points) exist in the sources but are not a received grade, so they must not be presented as the answer.",
+      "expected_sources": [],
+      "expected_passage": null,
+      "expected_heading": null
+    }
+  ]
+}

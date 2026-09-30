@@ -1,0 +1,77 @@
+{
+  "class-3-ms-pacman-dqn": {
+    "title": "Class 3 - Ms Pacman DQN",
+    "raw_path": "raw/Class 3 - Ms Pacman DQN.md",
+    "sha256": "d8fa1162cc83a04fd18d3089733ccb7de91aff9d99213c1c80850944116c1b2c",
+    "ingested_at": "2026-09-28T16:52:02",
+    "model": "gemma4:e4b",
+    "notes": [
+      "Ms Pac-Man DQN Agent",
+      "Hyperparameter Selection",
+      "Agent Observation Space",
+      "DQN Learning Rule",
+      "Agent Action Space"
+    ],
+    "origin": "my Class 3 repo `ms-pacman-dqn/README.md`"
+  },
+  "class-4-assignment-brief": {
+    "title": "Class 4 - Assignment Brief",
+    "raw_path": "raw/Class 4 - Assignment Brief.md",
+    "sha256": "7cdced7590d29fb1f10f1ee45eda5784b6c502c3af2ed3bbc8f1fd0c165112bd",
+    "ingested_at": "2026-09-28T16:24:07",
+    "model": "gemma4:e4b",
+    "notes": [
+      "Custom LLM Assignment",
+      "Corpus Expansion Strategy",
+      "Fixed Evaluation Protocol",
+      "Explaining Model Learning",
+      "Chat Interface Requirements"
+    ],
+    "origin": "Class 4 course brief `custom-llm-assignment/ASSIGNMENT.md`"
+  },
+  "class-4-nanogpt-experiment": {
+    "title": "Class 4 - nanoGPT Experiment",
+    "raw_path": "raw/Class 4 - nanoGPT Experiment.md",
+    "sha256": "ad31415287745514aac8b5995b5220efcb55d9393021c14eb0fd535f5fac6436",
+    "ingested_at": "2026-09-28T16:31:06",
+    "model": "gemma4:e4b",
+    "notes": [
+      "Causal Self-Attention",
+      "Gradients and AdamW",
+      "Hyperparameter Selection",
+      "Learning Rate",
+      "Temperature Sampling",
+      "nanoGPT Experiment"
+    ],
+    "origin": "my Class 4 repo `custom-llm-assignment/README.md`"
+  },
+  "networking-tracker-project": {
+    "title": "Networking Tracker Project",
+    "raw_path": "raw/Networking Tracker Project.md",
+    "sha256": "bd5159790d0e7656c0cc553c3e5d7ee39af16faddcea8f0de6966b38059dc1bf",
+    "ingested_at": "2026-09-28T16:36:19",
+    "model": "gemma4:e4b",
+    "notes": [
+      "Networking Tracker App",
+      "Row Level Security",
+      "Server-Side Validation",
+      "Neon Data API"
+    ],
+    "origin": "my project repo `networking-tracker/README.md`"
+  },
+  "class-5-personal-wiki-brief": {
+    "title": "Class 5 - Personal Wiki Brief",
+    "raw_path": "raw/Class 5 - Personal Wiki Brief.md",
+    "sha256": "dc2e5ada4b464883d7a8cbfada232a7ec9f5f6b828b650ef937a6ad43b9cb67d",
+    "ingested_at": "2026-09-29T22:28:04",
+    "model": "gemma4:e4b",
+    "notes": [
+      "Personal Wiki Assignment",
+      "Retrieval Augmented Generation",
+      "Three Required Modes",
+      "Local Model Deployment",
+      "Obsidian Wiki Structure"
+    ],
+    "origin": "Class 5 course brief (condensed copy of the assignment text, not verbatim)"
+  }
+}
